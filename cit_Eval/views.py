@@ -2,7 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from cryptography.hazmat.primitives.asymmetric import dh
-from cryptography.hazmat.primitives import serialization, Cipher, algorithms, modes
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from .models import Course, Evaluation, DHSession
 from .serializers import CourseSerializer, EvaluationSerializer
 import uuid

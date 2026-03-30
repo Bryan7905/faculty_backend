@@ -17,10 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from cit_Eval.auth_views import GoogleLoginView
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 urlpatterns = [
-    # The Django Admin Panel
-    path('admin/', admin.site.urls),
-    
-    # Route all API calls to your evaluations app
-    path('api/', include('cit_Eval.urls')),
+    path("admin/", admin.site.urls),
+
+    # JWT auth endpoints
+    path("api/auth/login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/auth/google/", GoogleLoginView.as_view(), name="google-login"),
+
+    # Your app endpoints
+    path("api/", include("cit_Eval.urls")),
 ]

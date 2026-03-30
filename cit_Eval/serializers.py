@@ -1,45 +1,40 @@
 from rest_framework import serializers
-from .models import User, Course, Evaluation, EvaluationSession
+from .models import User, Course, Evaluation
 
-# 1. User Serializer (To show who is who)
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'role', 'department', 'first_name', 'last_name']
-
-# 2. Course Serializer (To show students which courses they need to evaluate)
 class CourseSerializer(serializers.ModelSerializer):
-    faculty_name = serializers.ReadOnlyField(source='faculty.get_full_name')
+    faculty_name = serializers.ReadOnlyField(source="faculty.get_full_name")
 
     class Meta:
         model = Course
-        fields = ['id', 'name', 'code', 'faculty', 'faculty_name']
+        fields = ["id", "name", "code", "faculty", "faculty_name"]
 
-# 3. Evaluation Submission Serializer (The most important one)
+    def validate_faculty(self, value: User):
+        if value.role != "faculty":
+            raise serializers.ValidationError("Course faculty must have role='faculty'.")
+        return value
+
 class EvaluationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evaluation
-        fields = [
-            'course', 
-            'faculty', 
-            'teaching_quality', 
-            'punctuality', 
-            'course_content', 
-            'comments'
-        ]
+        fields = ["course", "faculty", "teaching_quality", "punctuality", "course_content", "comments"]
 
-    # Validation: Ensure ratings are between 1 and 5
-    def validate_teaching_quality(self, value):
+    def validate(self, attrs):
+        course = attrs.get("course")
+        faculty = attrs.get("faculty")
+        if course and faculty and course.faculty_id != faculty.id:
+            raise serializers.ValidationError({"faculty": "Faculty must match the course faculty."})
+        return attrs
+
+    def _validate_rating(self, value, field_name):
         if not (1 <= value <= 5):
-            raise serializers.ValidationError("Rating must be between 1 and 5.")
+            raise serializers.ValidationError(f"{field_name} must be between 1 and 5.")
         return value
 
-# 4. Analytics Serializer (For the Faculty/Admin Dashboard)
-class FacultyPerformanceSerializer(serializers.Serializer):
-    """
-    This is a 'Plain' Serializer (not linked to one model) 
-    used to send aggregated data like averages to React.
-    """
-    avg_quality = serializers.FloatField()
-    avg_punctuality = serializers.FloatField()
-    total_responses = serializers.IntegerField()
+    def validate_teaching_quality(self, value):
+        return self._validate_rating(value, "teaching_quality")
+
+    def validate_punctuality(self, value):
+        return self._validate_rating(value, "punctuality")
+
+    def validate_course_content(self, value):
+        return self._validate_rating(value, "course_content")

@@ -82,7 +82,7 @@ class GoogleLoginView(APIView):
 
         # Create or get user
         user, created = User.objects.get_or_create(
-            username=email,   # simple choice
+            username=email,   
             defaults={"email": email, "role": "student"},
         )
         if not user.email:

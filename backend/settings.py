@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-insecure-change-me")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
 ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,*").split(",")
     if h.strip()
 ]
 
@@ -62,8 +62,8 @@ TEMPLATES = [
 
 # React dev server origins (adjust to your frontend)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 # If you call APIs with Authorization header, allow it:
 from corsheaders.defaults import default_headers
